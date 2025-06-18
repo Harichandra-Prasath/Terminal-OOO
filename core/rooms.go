@@ -1,6 +1,10 @@
 package core
 
-import "github.com/google/uuid"
+import (
+	"sync"
+
+	"github.com/google/uuid"
+)
 
 type RoomConfig struct {
 	MaxPlayers int
@@ -10,6 +14,7 @@ type RoomConfig struct {
 }
 
 type Room struct {
+	Lock    sync.RWMutex
 	ID      uuid.UUID
 	Host    *Player
 	Players []*Player
@@ -25,4 +30,12 @@ func CreateNewRoom(Cfg *RoomConfig, host *Player) *Room {
 		Cfg:     Cfg,
 	}
 
+}
+
+func (R *Room) AddPlayer(player *Player) {
+
+	R.Lock.Lock()
+	defer R.Lock.Unlock()
+
+	R.Players = append(R.Players, player)
 }
