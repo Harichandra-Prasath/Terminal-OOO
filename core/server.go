@@ -34,6 +34,13 @@ func (S *Server) AddRoom(room *Room) {
 
 }
 
+func (S *Server) GetRoom(id uuid.UUID) *Room {
+	S.Lock.RLock()
+	defer S.Lock.RUnlock()
+
+	return S.Rooms[id]
+}
+
 func NewServer(Cfg *ServerCfg) *Server {
 
 	return &Server{

@@ -31,7 +31,7 @@ func writeGoodResponse(code int, w http.ResponseWriter, detail string, data map[
 	(w).Header().Set("Content-Type", "application/json")
 	(w).WriteHeader(code)
 	json.NewEncoder(w).Encode(map[string]any{
-		"status": "status",
+		"status": "success",
 		"detail": detail,
 		"data":   data,
 	})

@@ -19,6 +19,7 @@ type Room struct {
 	Host    *Player
 	Players []*Player
 	Cfg     *RoomConfig
+	Status  string
 }
 
 func CreateNewRoom(Cfg *RoomConfig, host *Player) *Room {
@@ -28,6 +29,7 @@ func CreateNewRoom(Cfg *RoomConfig, host *Player) *Room {
 		Host:    host,
 		Players: []*Player{host},
 		Cfg:     Cfg,
+		Status:  "YET_TO_START",
 	}
 
 }
