@@ -23,7 +23,8 @@ func (S *Server) registerRoutes(handler http.Handler) {
 	m := handler.(*http.ServeMux)
 	m.HandleFunc("POST /create-room", S.CreateRoomHandler)
 	m.HandleFunc("POST /join-room", S.JoinRoomHandler)
-	m.HandleFunc("POST /start-game", S.StartGameHandler)
+	m.HandleFunc("POST /start-room", S.StartGameHandler)
+	m.HandleFunc("GET /init/{roomId}", S.InitialiseHandler)
 }
 
 func (S *Server) AddRoom(room *Room) {

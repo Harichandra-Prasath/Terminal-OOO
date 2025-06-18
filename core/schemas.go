@@ -13,3 +13,8 @@ type JoinRoomRequest struct {
 	PlayerName string    `json:"player_name"`
 	RoomId     uuid.UUID `json:"room_id"`
 }
+
+type StartRoomRequest struct {
+	HostId uuid.UUID `json:"host_id"`
+	RoomId uuid.UUID `json:"room_id"`
+}

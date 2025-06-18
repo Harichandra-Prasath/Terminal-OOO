@@ -41,3 +41,17 @@ func (R *Room) AddPlayer(player *Player) {
 
 	R.Players = append(R.Players, player)
 }
+
+// Use Linear scan as the size will be small
+func (R *Room) GetPlayer(id uuid.UUID) *Player {
+	R.Lock.RLock()
+	defer R.Lock.RUnlock()
+
+	for _, player := range R.Players {
+		if id == player.Id {
+			return player
+		}
+	}
+
+	return nil
+}
