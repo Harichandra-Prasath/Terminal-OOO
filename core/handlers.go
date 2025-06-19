@@ -30,6 +30,7 @@ func (S *Server) CreateRoomHandler(w http.ResponseWriter, r *http.Request) {
 		S.AddRoom(room)
 		room.AddPlayer(host)
 		fmt.Printf("New Room added to server with ID '%s' by host '%s'\n", room.ID.String(), host.Name)
+		go room.Start()
 		writeGoodResponse(http.StatusCreated, w, "Room Created Successfully", map[string]any{
 			"room_id": room.ID,
 			"host_id": host.Id.String(),
@@ -129,7 +130,7 @@ func (S *Server) StartGameHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if room.Status != "STARTED" {
+		if room.Status == "STARTED" {
 			writeBadResponse(http.StatusBadRequest, w, "room already started")
 			return
 		}
@@ -137,6 +138,10 @@ func (S *Server) StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		// Update the room status
 		room.Status = "STARTED"
 		fmt.Printf("Room with ID '%s' Started\n", req.HostId)
+
+		// send the action messages
+		room.InboundChan <- &Message{Action: "START"}
+		fmt.Println("Hello")
 		writeGoodResponse(http.StatusCreated, w, "Room Started", map[string]any{})
 	}
 }
