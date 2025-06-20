@@ -28,7 +28,6 @@ func (S *Server) CreateRoomHandler(w http.ResponseWriter, r *http.Request) {
 		}, host)
 
 		S.AddRoom(room)
-		room.AddPlayer(host)
 		fmt.Printf("New Room added to server with ID '%s' by host '%s'\n", room.ID.String(), host.Name)
 		go room.Start()
 		writeGoodResponse(http.StatusCreated, w, "Room Created Successfully", map[string]any{
@@ -78,6 +77,7 @@ func (S *Server) InitialiseHandler(w http.ResponseWriter, r *http.Request) {
 
 	player.WsConn = NewConn
 	fmt.Printf("Player '%s' initialised his WS Connection\n", player.Name)
+	go room.ListenfromPlayer(player)
 }
 
 func (S *Server) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
@@ -141,7 +141,6 @@ func (S *Server) StartGameHandler(w http.ResponseWriter, r *http.Request) {
 
 		// send the action messages
 		room.InboundChan <- &Message{Action: "START"}
-		fmt.Println("Hello")
 		writeGoodResponse(http.StatusCreated, w, "Room Started", map[string]any{})
 	}
 }

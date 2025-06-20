@@ -23,12 +23,13 @@ type Room struct {
 	Status       string
 	InboundChan  chan *Message
 	OutboundChan chan *Message
+	VoteStore    map[uuid.UUID]int
 }
 
 type Message struct {
-	PlayerName string
-	Action     string
-	Value      string
+	PlayerId uuid.UUID `json:"player_id"`
+	Action   string    `json:"action"`
+	Value    string    `json:"value"`
 }
 
 func CreateNewRoom(Cfg *RoomConfig, host *Player) *Room {
@@ -41,6 +42,7 @@ func CreateNewRoom(Cfg *RoomConfig, host *Player) *Room {
 		Status:       "YET_TO_START",
 		InboundChan:  make(chan *Message),
 		OutboundChan: make(chan *Message),
+		VoteStore:    make(map[uuid.UUID]int),
 	}
 
 }
@@ -52,9 +54,13 @@ func (R *Room) Start() {
 
 		select {
 		case m := <-R.InboundChan:
-			if m.Action == "START" {
-				// Start the Reading
-				go R.ListenfromPlayers()
+			switch m.Action {
+			case "START":
+
+			case "HINT":
+				go R.handleHintMessages(m)
+			case "VOTE":
+				go R.handleVoteMessages(m)
 			}
 		case m := <-R.OutboundChan:
 			go R.WritetoPlayers(m)
@@ -64,11 +70,39 @@ func (R *Room) Start() {
 
 }
 
-func (R *Room) ListenfromPlayers() {
+// Forward the hint message
+func (R *Room) handleHintMessages(m *Message) {
 
-	for _, player := range R.Players {
-		go R.ListenfromPlayer(player)
+	hinter := R.GetPlayer(m.PlayerId)
+	fmt.Printf("Player '%s' gave the hint '%s'\n", hinter.Name, m.Value)
+
+	R.OutboundChan <- m
+}
+
+// Store the vote messages
+func (R *Room) handleVoteMessages(m *Message) {
+
+	Voter := R.GetPlayer(m.PlayerId).Name
+
+	// No vote
+	if m.Value == "" {
+		fmt.Printf("Player '%s' didnt Vote\n", Voter)
+		return
 	}
+
+	playerId, err := uuid.Parse(m.Value)
+	if err != nil {
+		fmt.Printf("Error in voting player with Id '%s': %s\n", m.Value, err.Error())
+	}
+
+	R.Lock.Lock()
+	R.VoteStore[playerId] += 1
+	R.Lock.Unlock()
+
+	Voted := R.GetPlayer(playerId).Name
+
+	fmt.Printf("Player '%s' voted '%s'\n", Voter, Voted)
+
 }
 
 func (R *Room) ListenfromPlayer(player *Player) {
