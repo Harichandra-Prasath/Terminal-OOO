@@ -18,33 +18,33 @@ type RoomConfig struct {
 
 type Room struct {
 	Lock         sync.RWMutex
-	ID           uuid.UUID
+	ID           string
 	Host         *Player
 	Players      []*Player
 	Cfg          *RoomConfig
 	Status       string
 	InboundChan  chan *Message
 	OutboundChan chan *Message
-	VoteStore    map[uuid.UUID]int
+	VoteStore    map[string]int
 }
 
 type Message struct {
-	PlayerId uuid.UUID `json:"player_id"`
-	Action   string    `json:"action"`
-	Value    string    `json:"value"`
+	PlayerId string `json:"player_id"`
+	Action   string `json:"action"`
+	Value    string `json:"value"`
 }
 
 func CreateNewRoom(Cfg *RoomConfig, host *Player) *Room {
 
 	return &Room{
-		ID:           uuid.New(),
+		ID:           uuid.New().String()[:7],
 		Host:         host,
 		Players:      []*Player{host},
 		Cfg:          Cfg,
 		Status:       "YET_TO_START",
 		InboundChan:  make(chan *Message),
 		OutboundChan: make(chan *Message),
-		VoteStore:    make(map[uuid.UUID]int),
+		VoteStore:    make(map[string]int),
 	}
 
 }
@@ -149,10 +149,7 @@ func (R *Room) handleVoteMessages(m *Message) {
 		return
 	}
 
-	playerId, err := uuid.Parse(m.Value)
-	if err != nil {
-		fmt.Printf("Error in voting player with Id '%s': %s\n", m.Value, err.Error())
-	}
+	playerId := m.Value
 
 	R.Lock.Lock()
 	R.VoteStore[playerId] += 1
@@ -219,7 +216,7 @@ func (R *Room) AddPlayer(player *Player) {
 }
 
 // Use Linear scan as the size will be small
-func (R *Room) GetPlayer(id uuid.UUID) *Player {
+func (R *Room) GetPlayer(id string) *Player {
 	R.Lock.RLock()
 	defer R.Lock.RUnlock()
 

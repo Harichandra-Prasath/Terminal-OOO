@@ -6,7 +6,7 @@ import (
 )
 
 type Player struct {
-	Id     uuid.UUID
+	Id     string
 	Name   string
 	WsConn *websocket.Conn
 	Alive  bool
@@ -15,7 +15,7 @@ type Player struct {
 
 func CreateNewPlayer(name string) *Player {
 	return &Player{
-		Id:    uuid.New(),
+		Id:    uuid.New().String()[:7],
 		Name:  name,
 		Alive: true,
 		Liar:  false,

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -28,11 +27,11 @@ func (S *Server) CreateRoomHandler(w http.ResponseWriter, r *http.Request) {
 		}, host)
 
 		S.AddRoom(room)
-		fmt.Printf("New Room added to server with ID '%s' by host '%s'\n", room.ID.String(), host.Name)
+		fmt.Printf("New Room added to server with ID '%s' by host '%s'\n", room.ID, host.Name)
 		go room.Start()
 		writeGoodResponse(http.StatusCreated, w, "Room Created Successfully", map[string]any{
 			"room_id": room.ID,
-			"host_id": host.Id.String(),
+			"host_id": host.Id,
 		})
 	}
 }
@@ -44,25 +43,13 @@ func (S *Server) InitialiseHandler(w http.ResponseWriter, r *http.Request) {
 	roomId := r.PathValue("roomId")
 	playerId := queryParams.Get("playerId")
 
-	RoomId, err := uuid.Parse(roomId)
-	if err != nil {
-		writeBadResponse(http.StatusBadRequest, w, "Invalid Information")
-		return
-	}
-
-	PlayerId, err := uuid.Parse(playerId)
-	if err != nil {
-		writeBadResponse(http.StatusBadRequest, w, "Invalid Information")
-		return
-	}
-
-	room := S.GetRoom(RoomId)
+	room := S.GetRoom(roomId)
 	if room == nil {
 		writeBadResponse(http.StatusNotFound, w, "Room not found on the server")
 		return
 	}
 
-	player := room.GetPlayer(PlayerId)
+	player := room.GetPlayer(playerId)
 	if player == nil {
 		writeBadResponse(http.StatusNotFound, w, "Player not on the room")
 		return
@@ -102,9 +89,9 @@ func (S *Server) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		room.AddPlayer(newPlayer)
-		fmt.Printf("Player '%s' added to the Room '%s'\n", req.PlayerName, room.ID.String())
+		fmt.Printf("Player '%s' added to the Room '%s'\n", req.PlayerName, room.ID)
 		writeGoodResponse(http.StatusCreated, w, "Player added to the room", map[string]any{
-			"player_id": newPlayer.Id.String(),
+			"player_id": newPlayer.Id,
 		})
 	}
 

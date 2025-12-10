@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-
-	"github.com/google/uuid"
 )
 
 type ServerCfg struct {
@@ -14,7 +12,7 @@ type ServerCfg struct {
 
 type Server struct {
 	Lock   sync.RWMutex
-	Rooms  map[uuid.UUID]*Room
+	Rooms  map[string]*Room
 	server *http.Server
 	Cfg    ServerCfg
 }
@@ -35,7 +33,7 @@ func (S *Server) AddRoom(room *Room) {
 
 }
 
-func (S *Server) GetRoom(id uuid.UUID) *Room {
+func (S *Server) GetRoom(id string) *Room {
 	S.Lock.RLock()
 	defer S.Lock.RUnlock()
 
@@ -45,7 +43,7 @@ func (S *Server) GetRoom(id uuid.UUID) *Room {
 func NewServer(Cfg *ServerCfg) *Server {
 
 	return &Server{
-		Rooms:  make(map[uuid.UUID]*Room),
+		Rooms:  make(map[string]*Room),
 		Cfg:    *Cfg,
 		server: &http.Server{Handler: http.NewServeMux()},
 	}

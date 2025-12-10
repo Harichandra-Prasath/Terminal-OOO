@@ -1,7 +1,5 @@
 package core
 
-import "github.com/google/uuid"
-
 type CreateRoomRequest struct {
 	PlayerName string `json:"player_name"`
 	MaxSize    int    `json:"max_size"`
@@ -10,11 +8,11 @@ type CreateRoomRequest struct {
 }
 
 type JoinRoomRequest struct {
-	PlayerName string    `json:"player_name"`
-	RoomId     uuid.UUID `json:"room_id"`
+	PlayerName string `json:"player_name"`
+	RoomId     string `json:"room_id"`
 }
 
 type StartRoomRequest struct {
-	HostId uuid.UUID `json:"host_id"`
-	RoomId uuid.UUID `json:"room_id"`
+	HostId string `json:"host_id"`
+	RoomId string `json:"room_id"`
 }
